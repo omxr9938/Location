@@ -40,8 +40,13 @@ showDaily = input.bool(true, "Tages-/Vortages-H/L zeichnen", group=G3)
 
 G4 = "Magic Numbers"
 showMagic   = input.bool(true, "Magic Numbers zeichnen", group=G4)
-magicMinor  = input.float(0.0, "Schrittweite (0 = automatisch)", minval=0.0, group=G4, tooltip="Beispiele: NQ/ES 100 bzw. 25, Gold 10, EURUSD 0.005. Mitte = 5x, Haupt = 10x der Schrittweite.")
+magicMinor  = input.float(0.0, "Schrittweite (0 = automatisch)", minval=0.0, group=G4, tooltip="NQ/MNQ/ES/MES werden automatisch erkannt: 25 / 50 / 100 Punkte (Klein / Mitte / Haupt). Für andere Märkte: Schrittweite eintragen, Mitte = 5x, Haupt = 10x.")
 magicCustom = input.text_area("", "Eigene Magic Numbers (getrennt durch ; oder Zeilenumbruch)", group=G4)
+
+G8 = "Alerts"
+alertOn     = input.bool(true, "Alert wenn Preis ein Key-Level berührt", group=G8)
+alertStars  = input.int(2, "Nur Level ab ★", minval=1, maxval=3, group=G8)
+alertDaily  = input.bool(true, "Alert bei Bruch von Vortag-H/L", group=G8)
 
 G5 = "Meine Zonen (Lern-Eingabe)"
 zonesTxt = input.text_area("", "Zonen: von-bis ; von-bis ; einzelner Preis", group=G5, tooltip="Beispiel: 20100-20150; 19850; 1.0840-1.0855\nDezimal mit Punkt oder Komma. Zonen werden gezeichnet und bewerten Level mit Bonus.")
@@ -177,6 +182,11 @@ if not na(pl)
     f_addSwing(swP, swS, swL, pl, 1.0 + volRatio * 0.5, swTol, swMax)
 f_updateSwing(swP, swS, swL, swTol)
 
+// Ausgewählte Level für Alerts
+var selP = array.new<float>()
+var selStars = array.new<int>()
+var selTag = array.new<string>()
+
 // Zeichen-Container
 var array<line>  lns = array.new<line>()
 var array<label> lbs = array.new<label>()
@@ -194,6 +204,9 @@ if barstate.islast
     array.clear(lns)
     array.clear(lbs)
     array.clear(bxs)
+    array.clear(selP)
+    array.clear(selStars)
+    array.clear(selTag)
     table.clear(tbl, 0, 0, 3, 15)
 
     int n = math.min(lookback, bar_index + 1)
@@ -323,9 +336,10 @@ if barstate.islast
     [zLo, zHi] = f_parse(zonesTxt)
     [mLo, mHi] = f_parse(magicCustom)
 
-    float minorStep = magicMinor > 0 ? magicMinor : math.pow(10, math.floor(math.log10(close)) - 2)
-    float midStep = minorStep * 5
-    float majorStep = minorStep * 10
+    bool isIdxFut = syminfo.root == "NQ" or syminfo.root == "MNQ" or syminfo.root == "ES" or syminfo.root == "MES"
+    float minorStep = magicMinor > 0 ? magicMinor : isIdxFut ? 25.0 : math.pow(10, math.floor(math.log10(close)) - 2)
+    float midStep = (magicMinor <= 0 and isIdxFut) ? 50.0 : minorStep * 5
+    float majorStep = (magicMinor <= 0 and isIdxFut) ? 100.0 : minorStep * 10
 
     // ── Bonus + Reaktions-Scoring je Cluster ──
     array<int>    clTouch = array.new<int>()
@@ -388,6 +402,9 @@ if barstate.islast
                 float rel = s / bestS
                 int stars = rel >= 0.75 ? 3 : rel >= 0.5 ? 2 : 1
                 color col = p >= close ? colRes : colSup
+                array.push(selP, p)
+                array.push(selStars, stars)
+                array.push(selTag, array.get(clT, c))
                 string txt = str.repeat("★", stars) + " " + array.get(clT, c) + "  " + str.tostring(p, format.mintick)
                 array.push(lns, line.new(bar_index - math.min(bar_index, 250), p, bar_index, p, color=col, width=stars, extend=extend.right))
                 array.push(lbs, label.new(labelX, p, txt, style=label.style_label_left, color=color.new(col, 85), textcolor=col, size=size.small))
@@ -439,3 +456,22 @@ if barstate.islast
                 zh := zl + math.max(tol * 0.3, syminfo.mintick)
             array.push(bxs, box.new(bar_index - math.min(bar_index, 250), zh, bar_index, zl, border_color=color.new(colZone, 30), bgcolor=colZone, extend=extend.right))
             array.push(lbs, label.new(bar_index + 1, (zh + zl) / 2, "Meine Zone", style=label.style_label_left, color=color.new(colZone, 90), textcolor=color.yellow, size=size.tiny))
+
+// ───────────────────────────── Alerts ─────────────────────────────
+// In TradingView: Alert erstellen -> Bedingung "Smart Key Levels" -> "Beliebiger alert()-Funktionsaufruf"
+if barstate.isconfirmed and barstate.isrealtime
+    string msg = ""
+    if alertOn
+        int ns = array.size(selP)
+        if ns > 0
+            for i = 0 to ns - 1
+                float lp = array.get(selP, i)
+                if array.get(selStars, i) >= alertStars and low <= lp and high >= lp
+                    msg += str.repeat("★", array.get(selStars, i)) + " " + array.get(selTag, i) + " @ " + str.tostring(lp, format.mintick) + "\n"
+    if alertDaily
+        if not na(pdH) and close[1] <= pdH and close > pdH
+            msg += "Vortag-H gebrochen @ " + str.tostring(pdH, format.mintick) + "\n"
+        if not na(pdL) and close[1] >= pdL and close < pdL
+            msg += "Vortag-T gebrochen @ " + str.tostring(pdL, format.mintick) + "\n"
+    if msg != ""
+        alert(syminfo.ticker + " (" + timeframe.period + ")\n" + msg, alert.freq_once_per_bar_close)
