@@ -52,7 +52,7 @@ alertDaily  = input.bool(true, "Alert bei Bruch von Vortag-H/L", group=G8)
 
 G9 = "Zonen um Key-Levels"
 zoneOn    = input.bool(true, "Level als Zone (Box) zeichnen", group=G9)
-zoneAbs   = input.float(0.0, "Zonenbreite in Punkten (0 = automatisch)", minval=0.0, step=1.0, group=G9, tooltip="0 = automatisch: Prozent vom Preis (NQ ~20 Pkt bei 28.400, ES ~5 Pkt bei 7.600). Feste Punkte überschreiben das.")
+zoneAbs   = input.float(0.0, "Zonenbreite in Punkten (0 = automatisch, Zone beginnt am Level)", minval=0.0, step=1.0, group=G9, tooltip="0 = automatisch: Prozent vom Preis (NQ ~20 Pkt bei 28.400, ES ~5 Pkt bei 7.600). Feste Punkte überschreiben das.")
 zonePct   = input.float(0.07, "Auto-Breite (% vom Preis)", minval=0.01, step=0.01, group=G9)
 colZoneKey = input.color(color.new(#9e9e9e, 85), "Zonen-Füllung", group=G9)
 
@@ -191,12 +191,14 @@ if not na(pl)
 f_updateSwing(swP, swS, swL, swTol)
 
 // Halbe Zonenbreite (Punkte)
-float zoneHalf = math.max((zoneAbs > 0 ? zoneAbs : close * zonePct / 100.0) / 2.0, syminfo.mintick)
+// Zone beginnt am Level: Preis über Level -> Zone nach oben ("üb." = Longs suchen), Preis unter Level -> Zone nach unten ("unt." = Shorts suchen)
+float zoneW = math.max(zoneAbs > 0 ? zoneAbs : close * zonePct / 100.0, syminfo.mintick)
 
 // Ausgewählte Level für Alerts
 var selP = array.new<float>()
 var selStars = array.new<int>()
 var selTag = array.new<string>()
+var selUp = array.new<bool>()
 var selZLo = array.new<float>()
 var selZHi = array.new<float>()
 var alertedP = array.new<float>()
@@ -221,6 +223,7 @@ if barstate.islast
     array.clear(selP)
     array.clear(selStars)
     array.clear(selTag)
+    array.clear(selUp)
     array.clear(selZLo)
     array.clear(selZHi)
     table.clear(tbl, 0, 0, 3, 15)
@@ -423,9 +426,11 @@ if barstate.islast
                 array.push(selP, p)
                 array.push(selStars, stars)
                 array.push(selTag, array.get(clT, c))
-                string txt = str.repeat("★", stars) + " " + array.get(clT, c) + "  " + str.tostring(p, format.mintick)
+                bool zUp = p <= close
+                array.push(selUp, zUp)
+                string txt = str.repeat("★", stars) + " " + (zUp ? "üb. " : "unt. ") + array.get(clT, c) + "  " + str.tostring(p, format.mintick)
                 if zoneOn
-                    array.push(bxs, box.new(bar_index - math.min(bar_index, 250), p + zoneHalf, bar_index, p - zoneHalf, border_color=color.new(col, 40), bgcolor=color.new(col, 88), extend=extend.right))
+                    array.push(bxs, box.new(bar_index - math.min(bar_index, 250), (zUp ? p + zoneW : p), bar_index, (zUp ? p : p - zoneW), border_color=color.new(col, 40), bgcolor=color.new(col, 88), extend=extend.right))
                 array.push(lns, line.new(bar_index - math.min(bar_index, 250), p, bar_index, p, color=col, width=1, style=line.style_dotted, extend=extend.right))
                 array.push(lbs, label.new(labelX, p, txt, style=label.style_label_left, color=color.new(col, 85), textcolor=col, size=size.small))
                 if showTable
@@ -495,10 +500,13 @@ if barstate.isrealtime
         for i = 0 to ns - 1
             if array.get(selStars, i) >= alertStars
                 float lp = array.get(selP, i)
-                float zh = zoneOn ? zoneHalf : 0.0
-                array.push(tLo, lp - zh)
-                array.push(tHi, lp + zh)
-                array.push(tTx, str.repeat("★", array.get(selStars, i)) + " " + array.get(selTag, i) + " " + str.tostring(lp - zh, format.mintick) + "-" + str.tostring(lp + zh, format.mintick))
+                bool up_ = array.get(selUp, i)
+                float zw = zoneOn ? zoneW : 0.0
+                float zl = up_ ? lp : lp - zw
+                float zh = up_ ? lp + zw : lp
+                array.push(tLo, zl)
+                array.push(tHi, zh)
+                array.push(tTx, str.repeat("★", array.get(selStars, i)) + " " + (up_ ? "üb. " : "unt. ") + array.get(selTag, i) + " " + str.tostring(zl, format.mintick) + "-" + str.tostring(zh, format.mintick))
     if alertZones
         int nz2 = array.size(selZLo)
         if nz2 > 0
