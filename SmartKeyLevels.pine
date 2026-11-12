@@ -44,7 +44,9 @@ magicMinor  = input.float(0.0, "Schrittweite (0 = automatisch)", minval=0.0, gro
 magicCustom = input.text_area("", "Eigene Magic Numbers (getrennt durch ; oder Zeilenumbruch)", group=G4)
 
 G8 = "Alerts"
-alertOn     = input.bool(true, "Alert wenn Preis ein Key-Level berührt", group=G8)
+alertOn     = input.bool(true, "Vorwarn-Alert vor Key-Level / Zone", group=G8)
+alertDist   = input.float(5.0, "Vorwarnabstand (Preis-Punkte)", minval=0.0, step=0.25, group=G8, tooltip="Alert kommt, sobald der Preis höchstens so viele Punkte vor dem Level bzw. der Zone ist (oder schon darin). Ein Level feuert nur einmal, bis sich der Preis wieder deutlich entfernt hat.")
+alertZones  = input.bool(true, "Auch für Meine Zonen", group=G8)
 alertStars  = input.int(2, "Nur Level ab ★", minval=1, maxval=3, group=G8)
 alertDaily  = input.bool(true, "Alert bei Bruch von Vortag-H/L", group=G8)
 
@@ -186,6 +188,9 @@ f_updateSwing(swP, swS, swL, swTol)
 var selP = array.new<float>()
 var selStars = array.new<int>()
 var selTag = array.new<string>()
+var selZLo = array.new<float>()
+var selZHi = array.new<float>()
+var alertedP = array.new<float>()
 
 // Zeichen-Container
 var array<line>  lns = array.new<line>()
@@ -207,6 +212,8 @@ if barstate.islast
     array.clear(selP)
     array.clear(selStars)
     array.clear(selTag)
+    array.clear(selZLo)
+    array.clear(selZHi)
     table.clear(tbl, 0, 0, 3, 15)
 
     int n = math.min(lookback, bar_index + 1)
@@ -335,6 +342,8 @@ if barstate.islast
     // ── Meine Zonen + eigene Magic Numbers ──
     [zLo, zHi] = f_parse(zonesTxt)
     [mLo, mHi] = f_parse(magicCustom)
+    array.concat(selZLo, zLo)
+    array.concat(selZHi, zHi)
 
     bool isIdxFut = syminfo.root == "NQ" or syminfo.root == "MNQ" or syminfo.root == "ES" or syminfo.root == "MES"
     float minorStep = magicMinor > 0 ? magicMinor : isIdxFut ? 25.0 : math.pow(10, math.floor(math.log10(close)) - 2)
@@ -458,20 +467,59 @@ if barstate.islast
             array.push(lbs, label.new(bar_index + 1, (zh + zl) / 2, "Meine Zone", style=label.style_label_left, color=color.new(colZone, 90), textcolor=color.yellow, size=size.tiny))
 
 // ───────────────────────────── Alerts ─────────────────────────────
-// In TradingView: Alert erstellen -> Bedingung "Smart Key Levels" -> "Beliebiger alert()-Funktionsaufruf"
-if barstate.isconfirmed and barstate.isrealtime
+// TradingView: Alert erstellen -> Bedingung "Smart Key Levels" -> "Beliebiger alert()-Funktionsaufruf"
+// Vorwarnung: kommt, sobald der Preis <= Vorwarnabstand vor dem Level / der Zone ist (Zone: Abstand zum nächsten Rand).
+f_dist(float lo, float hi) =>
+    math.max(math.max(lo - close, close - hi), 0.0)
+
+if barstate.isrealtime
     string msg = ""
-    if alertOn
-        int ns = array.size(selP)
-        if ns > 0
-            for i = 0 to ns - 1
+    float keyTol = math.max(alertDist * 0.5, syminfo.mintick)
+    // Ziele sammeln: Key-Level (lo=hi) + eigene Zonen
+    array<float>  tLo = array.new<float>()
+    array<float>  tHi = array.new<float>()
+    array<string> tTx = array.new<string>()
+    int ns = array.size(selP)
+    if ns > 0
+        for i = 0 to ns - 1
+            if array.get(selStars, i) >= alertStars
                 float lp = array.get(selP, i)
-                if array.get(selStars, i) >= alertStars and low <= lp and high >= lp
-                    msg += str.repeat("★", array.get(selStars, i)) + " " + array.get(selTag, i) + " @ " + str.tostring(lp, format.mintick) + "\n"
-    if alertDaily
+                array.push(tLo, lp)
+                array.push(tHi, lp)
+                array.push(tTx, str.repeat("★", array.get(selStars, i)) + " " + array.get(selTag, i) + " @ " + str.tostring(lp, format.mintick))
+    if alertZones
+        int nz2 = array.size(selZLo)
+        if nz2 > 0
+            for i = 0 to nz2 - 1
+                array.push(tLo, array.get(selZLo, i))
+                array.push(tHi, array.get(selZHi, i))
+                array.push(tTx, "Meine Zone " + str.tostring(array.get(selZLo, i), format.mintick) + "-" + str.tostring(array.get(selZHi, i), format.mintick))
+    if alertOn
+        int nt = array.size(tLo)
+        if nt > 0
+            for i = 0 to nt - 1
+                float lo = array.get(tLo, i)
+                float d = f_dist(lo, array.get(tHi, i))
+                int known = -1
+                int na_ = array.size(alertedP)
+                if na_ > 0
+                    for j = 0 to na_ - 1
+                        if math.abs(array.get(alertedP, j) - lo) <= keyTol
+                            known := j
+                            break
+                if d <= alertDist
+                    if known < 0
+                        array.push(alertedP, lo)
+                        string side = close < lo ? "von unten" : close > array.get(tHi, i) ? "von oben" : "im Level"
+                        msg += array.get(tTx, i) + " – " + str.tostring(d, "#.##") + " Pkt entfernt (" + side + ")\n"
+                else if d > alertDist * 2 and known >= 0
+                    array.remove(alertedP, known)
+        if array.size(alertedP) > 60
+            array.shift(alertedP)
+    if alertDaily and barstate.isconfirmed
         if not na(pdH) and close[1] <= pdH and close > pdH
             msg += "Vortag-H gebrochen @ " + str.tostring(pdH, format.mintick) + "\n"
         if not na(pdL) and close[1] >= pdL and close < pdL
             msg += "Vortag-T gebrochen @ " + str.tostring(pdL, format.mintick) + "\n"
     if msg != ""
-        alert(syminfo.ticker + " (" + timeframe.period + ")\n" + msg, alert.freq_once_per_bar_close)
+        alert(syminfo.ticker + " (" + timeframe.period + ")\n" + msg, alert.freq_all)

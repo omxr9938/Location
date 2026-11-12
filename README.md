@@ -20,4 +20,4 @@ Pine Script v6, `overlay=true`.
 Werden automatisch erkannt: Magic Numbers im 25/50/100-Punkte-Raster.
 
 ### Alerts
-Alert anlegen → Bedingung „Smart Key Levels" → „Beliebiger alert()-Funktionsaufruf". Meldet Berührung von Key-Levels (ab wählbarer ★-Zahl) und den Bruch von Vortag-H/L, einmal pro Bar-Schluss.
+Alert anlegen → Bedingung „Smart Key Levels" → „Beliebiger alert()-Funktionsaufruf". Vorwarnung: kommt, sobald der Preis höchstens N Punkte (Standard 5) vor einem Key-Level (ab wählbarer ★-Zahl) oder einer eigenen Zone ist – jedes Level feuert nur einmal, bis sich der Preis wieder entfernt hat. Zusätzlich Alert bei Bruch von Vortag-H/L (Bar-Schluss).
