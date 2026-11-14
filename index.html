@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Виталина — Telegram</title>
+<meta name="description" content="Виталина — эксклюзивный контент и общение в Telegram. / Exclusive content and chat on Telegram.">
+<meta property="og:title" content="Виталина — Telegram">
+<meta property="og:description" content="Эксклюзивный контент и общение в Telegram · Exclusive content & chat on Telegram">
+<meta property="og:image" content="img/roses.jpg">
+<meta name="theme-color" content="#0e0a0b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0a0b; --bg2:#171112; --text:#f5ece8; --muted:#b9a9a5;
+  --rose:#c4344f; --rose2:#e8607a; --gold:#d9b38c; --line:rgba(255,255,255,.1);
+  --tg:#2aabee;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:inherit}
+.serif{font-family:"Cormorant Garamond",Georgia,serif}
+.wrap{width:min(1080px,100% - 32px);margin-inline:auto}
+
+/* top bar */
+.bar{position:fixed;inset:0 0 auto 0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));
+  background:linear-gradient(#0e0a0bcc,transparent)}
+.logo{font-family:"Cormorant Garamond",serif;font-size:1.4rem;letter-spacing:.04em}
+.lang{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:#0e0a0b88;backdrop-filter:blur(8px)}
+.lang button{all:unset;cursor:pointer;padding:6px 14px;font-size:.8rem;font-weight:600;letter-spacing:.08em;color:var(--muted)}
+.lang button[aria-pressed=true]{background:var(--text);color:var(--bg)}
+
+/* hero */
+.hero{position:relative;min-height:100svh;display:grid;align-items:end;padding:120px 0 64px;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:url(img/portrait-dark.jpg) 62% 20%/cover no-repeat}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(180deg,#0e0a0b55 0%,#0e0a0b00 30%,#0e0a0bd9 78%,#0e0a0b 100%),
+             linear-gradient(90deg,#0e0a0bcc 0%,transparent 60%)}
+.eyebrow{display:inline-block;font-size:.75rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+h1{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:clamp(3.4rem,13vw,7.5rem);line-height:.95;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--rose2)}
+.lead{margin-top:18px;max-width:34ch;font-size:clamp(1.05rem,3.4vw,1.3rem);color:#e6d8d3}
+.cta{display:inline-flex;align-items:center;gap:12px;margin-top:30px;padding:16px 28px;border-radius:99px;text-decoration:none;font-weight:600;font-size:1.05rem;
+  background:linear-gradient(135deg,var(--rose),#9c2140);color:#fff;box-shadow:0 10px 40px -8px #c4344f99;transition:transform .2s,box-shadow .2s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 16px 48px -8px #c4344fcc}
+.cta svg{width:22px;height:22px;fill:currentColor}
+.cta.tg{background:linear-gradient(135deg,#37b6f5,#1d8fd1);box-shadow:0 10px 40px -8px #2aabeeaa}
+.cta.tg:hover{box-shadow:0 16px 48px -8px #2aabeecc}
+.scroll{position:absolute;bottom:18px;left:50%;translate:-50% 0;font-size:.7rem;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;opacity:.7}
+
+/* sections */
+section{padding:88px 0}
+h2{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:clamp(2.2rem,7vw,3.6rem);line-height:1.05;margin-bottom:14px}
+h2 em{font-style:italic;color:var(--rose2)}
+.sub{color:var(--muted);max-width:52ch}
+
+/* about */
+.about{display:grid;gap:36px;align-items:center}
+@media(min-width:800px){.about{grid-template-columns:5fr 6fr;gap:64px}}
+.about figure{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:3/4}
+.about figure img{width:100%;height:100%;object-fit:cover}
+.about figure::after{content:"";position:absolute;inset:0;border-radius:22px;box-shadow:inset 0 0 0 1px var(--line)}
+.about p+p{margin-top:14px}
+
+/* perks */
+.perks{background:var(--bg2);border-block:1px solid var(--line)}
+.grid{display:grid;gap:16px;margin-top:40px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
+.card{padding:28px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(160deg,#ffffff0a,#ffffff03)}
+.card .ic{font-size:1.6rem;margin-bottom:12px}
+.card h3{font-size:1.1rem;font-weight:600;margin-bottom:6px}
+.card p{color:var(--muted);font-size:.95rem}
+
+/* gallery */
+.gal{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:36px}
+@media(min-width:800px){.gal{grid-template-columns:repeat(6,1fr);gap:16px}}
+.gal a{position:relative;overflow:hidden;border-radius:18px;background:var(--bg2);display:block}
+.gal img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.gal a:hover img{transform:scale(1.05)}
+.gal .a{grid-column:span 2;aspect-ratio:16/10}
+.gal .b,.gal .c,.gal .d{aspect-ratio:3/4}
+@media(min-width:800px){
+  .gal .a{grid-column:span 4;aspect-ratio:auto}
+  .gal .b{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
+  .gal .c,.gal .d{grid-column:span 2}
+  .gal .e{grid-column:span 2}
+}
+.gal .e{grid-column:span 2;aspect-ratio:16/9}
+@media(min-width:800px){.gal .e{aspect-ratio:3/4}}
+
+/* final cta */
+.final{text-align:center;position:relative;isolation:isolate;overflow:hidden}
+.final::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 80% at 50% 100%,#c4344f44,transparent 70%)}
+.final .sub{margin-inline:auto}
+.final .cta{margin-top:28px}
+
+footer{padding:36px 0 max(36px,env(safe-area-inset-bottom));border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:.8rem}
+.badge{display:inline-block;border:1px solid var(--muted);border-radius:6px;padding:1px 8px;margin-right:8px;font-weight:600}
+
+/* age gate */
+#gate{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:#0e0a0bf2;backdrop-filter:blur(18px);text-align:center}
+#gate[hidden]{display:none}
+#gate .box{max-width:420px}
+#gate h2{font-size:2.6rem}
+#gate .row{display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+#gate button{all:unset;cursor:pointer;padding:13px 26px;border-radius:99px;font-weight:600}
+#gate .yes{background:linear-gradient(135deg,var(--rose),#9c2140)}
+#gate .no{border:1px solid var(--line);color:var(--muted)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .8s,transform .8s}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div id="gate" role="dialog" aria-modal="true" hidden>
+  <div class="box">
+    <h2><em>18+</em></h2>
+    <p class="sub" style="margin-inline:auto" data-i18n="gate_text"></p>
+    <div class="row">
+      <button class="yes" id="gate-yes" data-i18n="gate_yes"></button>
+      <button class="no" id="gate-no" data-i18n="gate_no"></button>
+    </div>
+  </div>
+</div>
+
+<header class="bar">
+  <span class="logo">Виталина</span>
+  <div class="lang" role="group" aria-label="Language">
+    <button data-lang="ru" aria-pressed="true">RU</button>
+    <button data-lang="en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow" data-i18n="eyebrow"></span>
+      <h1 data-i18n-html="hero_name"></h1>
+      <p class="lead" data-i18n="hero_lead"></p>
+      <a class="cta tg" data-tg href="https://t.me/USERNAME" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M9.78 15.3l-.4 4.2c.57 0 .82-.25 1.12-.54l2.7-2.58 5.6 4.1c1.03.57 1.76.27 2.04-.95l3.7-17.3c.33-1.52-.55-2.12-1.55-1.75L1.2 9.6c-1.48.58-1.46 1.4-.26 1.77l5.57 1.74L19.4 5c.6-.4 1.16-.18.7.22z"/></svg>
+        <span data-i18n="cta"></span>
+      </a>
+    </div>
+    <span class="scroll">↓</span>
+  </section>
+
+  <section>
+    <div class="wrap about">
+      <figure class="rv"><img src="img/roses.jpg" alt="Виталина с букетом роз" loading="lazy"></figure>
+      <div class="rv">
+        <h2 data-i18n-html="about_h"></h2>
+        <p class="sub" data-i18n="about_p1"></p>
+        <p class="sub" data-i18n="about_p2"></p>
+        <a class="cta tg" data-tg href="https://t.me/USERNAME" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M9.78 15.3l-.4 4.2c.57 0 .82-.25 1.12-.54l2.7-2.58 5.6 4.1c1.03.57 1.76.27 2.04-.95l3.7-17.3c.33-1.52-.55-2.12-1.55-1.75L1.2 9.6c-1.48.58-1.46 1.4-.26 1.77l5.57 1.74L19.4 5c.6-.4 1.16-.18.7.22z"/></svg>
+          <span data-i18n="cta"></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="perks">
+    <div class="wrap rv">
+      <h2 data-i18n-html="perks_h"></h2>
+      <p class="sub" data-i18n="perks_sub"></p>
+      <div class="grid">
+        <div class="card"><div class="ic">✨</div><h3 data-i18n="p1_t"></h3><p data-i18n="p1_d"></p></div>
+        <div class="card"><div class="ic">💬</div><h3 data-i18n="p2_t"></h3><p data-i18n="p2_d"></p></div>
+        <div class="card"><div class="ic">🌹</div><h3 data-i18n="p3_t"></h3><p data-i18n="p3_d"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap rv">
+      <h2 data-i18n-html="gal_h"></h2>
+      <div class="gal">
+        <a class="a" href="img/pool-silhouette.jpg"><img src="img/pool-silhouette.jpg" alt="" loading="lazy"></a>
+        <a class="b" href="img/portrait-bw.jpg"><img src="img/portrait-bw.jpg" alt="" loading="lazy"></a>
+        <a class="c" href="img/pool-sunglasses.jpg"><img src="img/pool-sunglasses.jpg" alt="" loading="lazy" style="object-position:50% 30%"></a>
+        <a class="d" href="img/portrait-dark.jpg"><img src="img/portrait-dark.jpg" alt="" loading="lazy" style="object-position:58% 20%"></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap rv">
+      <h2 data-i18n-html="final_h"></h2>
+      <p class="sub" data-i18n="final_p"></p>
+      <a class="cta tg" data-tg href="https://t.me/USERNAME" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M9.78 15.3l-.4 4.2c.57 0 .82-.25 1.12-.54l2.7-2.58 5.6 4.1c1.03.57 1.76.27 2.04-.95l3.7-17.3c.33-1.52-.55-2.12-1.55-1.75L1.2 9.6c-1.48.58-1.46 1.4-.26 1.77l5.57 1.74L19.4 5c.6-.4 1.16-.18.7.22z"/></svg>
+        <span data-i18n="cta"></span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap"><span class="badge">18+</span><span data-i18n="foot"></span></div>
+</footer>
+
+<script>
+/* ====== HIER ANPASSEN / НАСТРОЙКИ ====== */
+const TELEGRAM_URL = "https://t.me/USERNAME";   // ← Telegram-Link von Vitalina
+/* ======================================= */
+
+const T = {
+  ru:{
+    gate_text:"Этот сайт содержит контент для взрослых. Подтвердите, что вам уже исполнилось 18 лет.",
+    gate_yes:"Мне есть 18", gate_no:"Выйти",
+    eyebrow:"Официальная страница",
+    hero_name:"Вита<em>лина</em>",
+    hero_lead:"Больше, чем на фото. Закрытый Telegram-канал только для своих.",
+    cta:"Перейти в Telegram",
+    about_h:"Привет, я <em>Виталина</em>",
+    about_p1:"Здесь я делюсь тем, что не попадает в ленту: больше эмоций, больше близости, больше меня.",
+    about_p2:"В Telegram я общаюсь с подписчиками напрямую — без лишних фильтров и посредников.",
+    perks_h:"Что тебя <em>ждёт</em>",
+    perks_sub:"Всё самое интересное — в одном месте.",
+    p1_t:"Эксклюзив", p1_d:"Фото и видео, которых нет больше нигде.",
+    p2_t:"Личное общение", p2_d:"Отвечаю лично и ближе знакомлюсь с каждым.",
+    p3_t:"Первыми — ранний доступ", p3_d:"Новинки и сюрпризы для подписчиков раньше всех.",
+    gal_h:"Немного <em>атмосферы</em>",
+    final_h:"Увидимся <em>в Telegram</em>",
+    final_p:"Один клик — и ты в закрытом клубе.",
+    foot:"Только для лиц старше 18 лет. © Виталина"
+  },
+  en:{
+    gate_text:"This website contains adult content. Please confirm that you are at least 18 years old.",
+    gate_yes:"I am 18+", gate_no:"Leave",
+    eyebrow:"Official page",
+    hero_name:"Vita<em>lina</em>",
+    hero_lead:"More than what you see in photos. A private Telegram, just for you.",
+    cta:"Join me on Telegram",
+    about_h:"Hi, I’m <em>Vitalina</em>",
+    about_p1:"This is where I share what never makes it to the feed: more emotion, more closeness, more of me.",
+    about_p2:"On Telegram I talk to my subscribers directly — no filters, no middlemen.",
+    perks_h:"What’s <em>waiting</em> for you",
+    perks_sub:"All the good stuff, in one place.",
+    p1_t:"Exclusive content", p1_d:"Photos and videos you won’t find anywhere else.",
+    p2_t:"Personal chat", p2_d:"I reply personally and get to know each of you.",
+    p3_t:"Early access", p3_d:"New drops and surprises for subscribers first.",
+    gal_h:"A little <em>atmosphere</em>",
+    final_h:"See you <em>on Telegram</em>",
+    final_p:"One tap and you’re in the private club.",
+    foot:"For adults 18+ only. © Vitalina"
+  }
+};
+const $=(s,r=document)=>[...r.querySelectorAll(s)];
+function setLang(l){
+  document.documentElement.lang=l;
+  $("[data-i18n]").forEach(e=>e.textContent=T[l][e.dataset.i18n]);
+  $("[data-i18n-html]").forEach(e=>e.innerHTML=T[l][e.dataset.i18nHtml]);
+  $("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===l));
+  document.title = l==="ru" ? "Виталина — Telegram" : "Vitalina — Telegram";
+  document.querySelector(".logo").textContent = l==="ru" ? "Виталина" : "Vitalina";
+  try{localStorage.setItem("lang",l)}catch(e){}
+}
+$("[data-lang]").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+$("[data-tg]").forEach(a=>a.href=TELEGRAM_URL);
+
+let saved=null; try{saved=localStorage.getItem("lang")}catch(e){}
+setLang(saved || ((navigator.language||"").toLowerCase().startsWith("ru") ? "ru":"en"));
+
+/* age gate */
+const gate=document.getElementById("gate");
+let ok=false; try{ok=localStorage.getItem("age18")==="1"}catch(e){}
+if(!ok){gate.hidden=false;document.body.style.overflow="hidden"}
+document.getElementById("gate-yes").onclick=()=>{gate.hidden=true;document.body.style.overflow="";try{localStorage.setItem("age18","1")}catch(e){}};
+document.getElementById("gate-no").onclick=()=>{location.href="https://www.google.com"};
+
+/* reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
+$(".rv").forEach(e=>io.observe(e));
+</script>
+</body>
+</html>
